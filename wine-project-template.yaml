@@ -68,17 +68,17 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: ${DATABASE_SERVICE_NAME}
+                name: ${NAME}
           - name: MONGODB_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: ${DATABASE_SERVICE_NAME}
+                name: ${NAME}
           - name: MONGODB_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-admin-password
-                name: ${DATABASE_SERVICE_NAME}
+                name: ${NAME}
           - name: MONGODB_DATABASE
             value: ${MONGODB_DATABASE}
           image: ' '
