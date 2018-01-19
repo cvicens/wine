@@ -240,6 +240,10 @@ objects:
             value: ${DATABASE_SERVICE_NAME}
           - name: DATABASE_SERVICE_PORT
             value: "27017"
+          - name: TRACING_SERVICE_NAME
+            value: ${TRACING_SERVICE_NAME}
+          - name: TRACING_SERVICE_PORT
+            value: ${TRACING_SERVICE_PORT}
           image: ${NAME}-pairing
           imagePullPolicy: Always
           name: ${NAME}-pairing
@@ -424,6 +428,10 @@ objects:
             value: ${DATABASE_SERVICE_NAME}
           - name: DATABASE_SERVICE_PORT
             value: "27017"
+          - name: TRACING_SERVICE_NAME
+            value: ${TRACING_SERVICE_NAME}
+          - name: TRACING_SERVICE_PORT
+            value: ${TRACING_SERVICE_PORT}
           image: ${NAME}-cellar
           imagePullPolicy: Always
           name: ${NAME}-cellar
