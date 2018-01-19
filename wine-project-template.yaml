@@ -253,7 +253,7 @@ objects:
           livenessProbe:
             failureThreshold: 10
             httpGet:
-              path: /pairing
+              path: /health
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 30
@@ -263,7 +263,7 @@ objects:
           readinessProbe:
             failureThreshold: 10
             httpGet:
-              path: /pairing?foodType=FISH
+              path: /readiness
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 30
@@ -437,7 +437,7 @@ objects:
           livenessProbe:
             failureThreshold: 10
             httpGet:
-              path: /cellar
+              path: /health
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 30
@@ -447,7 +447,7 @@ objects:
           readinessProbe:
             failureThreshold: 10
             httpGet:
-              path: /cellar?wineType=XYZ
+              path: /readiness
               port: 8080
               scheme: HTTP
             initialDelaySeconds: 30
