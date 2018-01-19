@@ -10,7 +10,7 @@ import com.uber.jaeger.samplers.ProbabilisticSampler;
 
 @SpringBootApplication
 public class WineCellarApplication {
-	public static final String WINE_SERVICE = "wine-service";
+	public static final String WINE_SERVICE = "wine-cellar";
 
 	private static final String TRACING_SERVICE_NAME = "TRACING_SERVICE_NAME";
     private static final String TRACING_SERVICE_PORT = "TRACING_SERVICE_PORT";
