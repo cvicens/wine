@@ -4,7 +4,7 @@ metadata:
   name: wine-template
   annotations:
     openshift.io/display-name: "Wine Application" 
-    description: "Example application based on a Spring Boot microservice plus MongoDB\n\nFor more information see https://github.com/cvicens/wine-pairing-mock" 
+    description: "Example application based on a Spring Boot microservice plus MongoDB\n\nFor more information see https://github.com/cvicens/wine" 
     tags: "spring-boot,mongodb" 
     iconClass: "icon-spring" 
   message: "Your credentials for MongoDB are ${MONGODB_USER}:${MONGODB_PASSWORD} with admin password: ${MONGODB_ADMIN_PASSWORD}"
@@ -351,7 +351,7 @@ objects:
       contextDir: cellar
       git:
         ref: master
-        uri: https://github.com/cvicens/wine-project
+        uri: https://github.com/cvicens/wine
       type: Git
     strategy:
       sourceStrategy:
