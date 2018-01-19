@@ -35,7 +35,15 @@ public class WinePairingController {
     private final AtomicLong pairingCounter = new AtomicLong();
     private final AtomicLong wineRepositoryCounter = new AtomicLong();
 
-    
+    @RequestMapping("/health")
+    public String health() {
+        return "OK";
+    }
+
+    @RequestMapping("/readiness")
+    public String readiness() {
+        return "OK";
+    }
 
     @RequestMapping("/pairing")
     public WinePairingResponse pairing(@RequestParam(value="foodType", defaultValue=UNKOWN_FOOD) String foodType) {

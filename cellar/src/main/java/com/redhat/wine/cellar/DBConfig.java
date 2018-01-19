@@ -1,4 +1,4 @@
-package com.redhat.wine.pairing;
+package com.redhat.wine.cellar;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

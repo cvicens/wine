@@ -1,4 +1,4 @@
-package com.redhat.wine.pairing;
+package com.redhat.wine.cellar;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -19,15 +19,23 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
-public class WinePairingApplicationTests {
+public class WineCellarApplicationTests {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
-    public void noParamGreetingShouldReturnDefaultMessage() throws Exception {
+    public void paramPairingWithRightFoodTypeShouldReturnTailoredMessage() throws Exception {
 
-        this.mockMvc.perform(get("/greeting")).andDo(print()).andExpect(status().isOk())
-                .andExpect(jsonPath("$.content").value("Hello, World!"));
+        this.mockMvc.perform(
+                get("/wine")
+                    .param("wineType", WineType.BOLD_RED.toString())
+                    .param("region", "rioja"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.status").value(WineCellarController.SUCCESS))
+                .andExpect(jsonPath("$.description").value(WineCellarController.SUCCESS))
+                .andExpect(jsonPath("$.wines").isArray());
+
     }
 }

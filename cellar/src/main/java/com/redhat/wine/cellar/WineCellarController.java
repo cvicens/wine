@@ -1,4 +1,4 @@
-package com.redhat.wine.pairing;
+package com.redhat.wine.cellar;
 
 import java.util.List;
 import java.util.Optional;
@@ -6,6 +6,7 @@ import io.opentracing.Span;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,15 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 @RestController
-public class WineController {
+public class WineCellarController {
     @Autowired
     private io.opentracing.Tracer tracer;
     
     @Autowired
     private RestTemplate restTemplate;
-    
-    @Autowired
-    private CustomerRepository repository;
 
     @Autowired
     private WineRepository wineRepository;
@@ -33,52 +31,36 @@ public class WineController {
     public static final String UNKOWN_WINE_TYPE = "UNKOWN_WINE_TYPE";
     public static final String UNKOWN_REGION = "UNKOWN_REGION";
 
-    public static final String UNKOWN_FOOD = "UNKOWN_FOOD";
     public static final String ERROR = "ERROR";
     public static final String SUCCESS = "SUCCESS";
 
-    private static final String template = "Hello, %s!";
-
-    private final AtomicLong counter = new AtomicLong();
-    private final AtomicLong pairingCounter = new AtomicLong();
     private final AtomicLong wineRepositoryCounter = new AtomicLong();
 
+    @RequestMapping("/health")
+    public String health() {
+        return "OK";
+    }
+
+    @RequestMapping("/readiness")
+    public String readiness() {
+        return "OK";
+    }
+
+    @PostConstruct
     @RequestMapping("/init")
     public String init () {
         Optional.ofNullable(tracer.activeSpan()).ifPresent(as -> as.setBaggageItem("wine-task", "init"));
+        
+        System.out.println("==> Executing init!");
 
+        // Clean
         wineRepository.deleteAll();
 
         // save a couple of wines
 		wineRepository.save(new Wine(WineType.DRY_WHITE, 2016, "Bodegas Terras Gauda 2016", "ALBARIÑO", "Bodegas Terras Gauda", "Spain", "70% Albariño, 18% Caiño y 12% Loureiro", "Golden", "Clear, expresive", "Acid, strong, fruity", "12.5%"));
 		wineRepository.save(new Wine(WineType.BOLD_RED, 2013, "Sierra Cantabria Cuvee 2013", "RIOJA", "Bodegas y Viñedos Sierra Cantabria", "Spain", "100% Tempranillo", "Cherry red", "Elegant, intense", "Balanced, cocoa and red fruits", "14%"));
-
-
-        repository.deleteAll();
-
-		// save a couple of customers
-		repository.save(new Customer("Alice", "Smith"));
-		repository.save(new Customer("Bob", "Smith"));
-
-		// fetch all customers
-		System.out.println("Customers found with findAll():");
-		System.out.println("-------------------------------");
-		for (Customer customer : repository.findAll()) {
-			System.out.println(customer);
-		}
-		System.out.println();
-
-		// fetch an individual customer
-		System.out.println("Customer found with findByFirstName('Alice'):");
-		System.out.println("--------------------------------");
-		System.out.println(repository.findByFirstName("Alice"));
-
-		System.out.println("Customers found with findByLastName('Smith'):");
-		System.out.println("--------------------------------");
-		for (Customer customer : repository.findByLastName("Smith")) {
-			System.out.println(customer);
-        }
         
+        System.out.println("==> Init executed!");
 		return "The End";
     }
 
@@ -112,12 +94,5 @@ public class WineController {
         } catch (Throwable e) {
             return new WineRepositoryResponse (wineRepositoryCounter.incrementAndGet(), ERROR, UNKOWN_ERROR, new Wine[0]);
         }
-    }
-
-    /**  Tracing tests  **/
-    @RequestMapping("/greeting")
-    public Greeting greeting(@RequestParam(value="name", defaultValue="World") String name) {
-        return new Greeting(counter.incrementAndGet(),
-                            String.format(template, name));
     }
 }

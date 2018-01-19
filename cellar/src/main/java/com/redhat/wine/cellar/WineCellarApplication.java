@@ -1,4 +1,4 @@
-package com.redhat.wine.pairing;
+package com.redhat.wine.cellar;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,7 +9,7 @@ import com.uber.jaeger.Configuration;
 import com.uber.jaeger.samplers.ProbabilisticSampler;
 
 @SpringBootApplication
-public class WineApplication {
+public class WineCellarApplication {
 	public static final String WINE_SERVICE = "wine-service";
 
 	private static final String TRACING_SERVICE_NAME = "TRACING_SERVICE_NAME";
@@ -55,6 +55,6 @@ public class WineApplication {
 	}*/
 
 	public static void main(String[] args) {
-		SpringApplication.run(WineApplication.class, args);
+		SpringApplication.run(WineCellarApplication.class, args);
 	}
 }
