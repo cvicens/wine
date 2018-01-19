@@ -15,11 +15,11 @@ objects:
 - kind: Secret
   apiVersion: v1
   metadata:
+    name: ${NAME}
     annotations:
       template.openshift.io/expose-admin_password: '{.data[''database-admin-password'']}'
       template.openshift.io/expose-password: '{.data[''database-password'']}'
       template.openshift.io/expose-username: '{.data[''database-user'']}'
-    name: ${DATABASE_SERVICE_NAME}
   stringData:
     database-admin-password: ${MONGODB_ADMIN_PASSWORD}
     database-password: ${MONGODB_PASSWORD}
@@ -223,17 +223,17 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: mongodb
+                name: ${NAME}
           - name: MONGODB_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: mongodb
+                name: ${NAME}
           - name: MONGODB_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-admin-password
-                name: mongodb
+                name: ${NAME}
           - name: MONGODB_DATABASE
             value: ${MONGODB_DATABASE}
           - name: DATABASE_SERVICE_NAME
@@ -407,17 +407,17 @@ objects:
             valueFrom:
               secretKeyRef:
                 key: database-user
-                name: mongodb
+                name: ${NAME}
           - name: MONGODB_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-password
-                name: mongodb
+                name: ${NAME}
           - name: MONGODB_ADMIN_PASSWORD
             valueFrom:
               secretKeyRef:
                 key: database-admin-password
-                name: mongodb
+                name: ${NAME}
           - name: MONGODB_DATABASE
             value: ${MONGODB_DATABASE}
           - name: DATABASE_SERVICE_NAME
