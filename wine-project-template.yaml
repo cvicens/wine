@@ -515,6 +515,15 @@ parameters:
   required: true
   value: wine
 
+- displayName: Tracing Service Name
+  name: TRACING_SERVICE_NAME
+  required: false
+
+- description: OpenTracing compatible Service Port (http://opentracing.io/)
+  displayName: Tracing Service Port
+  name: TRACING_SERVICE_PORT
+  required: false
+
 - description: Maximum amount of memory the Spring Boot API container can use.
   displayName: Memory Limit
   name: MEMORY_LIMIT
@@ -529,7 +538,7 @@ parameters:
 - displayName: Database Service Name
   name: DATABASE_SERVICE_NAME
   required: true
-  value: mongodb
+  value: wine-mongodb
   
 - description: Maximum amount of memory the MongoDB container can use.
   displayName: Memory Limit (MongoDB)
