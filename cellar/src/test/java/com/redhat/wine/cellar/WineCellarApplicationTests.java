@@ -1,41 +1,51 @@
 package com.redhat.wine.cellar;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.ArrayList;
+import java.util.List;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.not;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @AutoConfigureMockMvc
 public class WineCellarApplicationTests {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Mock
+    private WineRepository wineRepository;
+
+    @Mock
+    private io.opentracing.Tracer tracer;
+
+    @InjectMocks
+    WineCellarController controllerImpl;
 
     @Test
     public void paramPairingWithRightFoodTypeShouldReturnTailoredMessage() throws Exception {
-
-        this.mockMvc.perform(
-                get("/wine")
-                    .param("wineType", WineType.BOLD_RED.toString())
-                    .param("region", "rioja"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(WineCellarController.SUCCESS))
-                .andExpect(jsonPath("$.description").value(WineCellarController.SUCCESS))
-                .andExpect(jsonPath("$.wines").isArray());
-
+        
+        List<Wine> wines = new ArrayList<Wine> ();
+        wines.add(new Wine(WineType.BOLD_RED, 2013, "Sierra Cantabria Cuvee 2013", "RIOJA", "Bodegas y Viñedos Sierra Cantabria", "Spain", "100% Tempranillo", "Cherry red", "Elegant, intense", "Balanced, cocoa and red fruits", "14%"));
+        when(wineRepository.findByTypeAndRegion(WineType.BOLD_RED, "RIOJA")).thenReturn(wines);
+        
+        WineRepositoryResponse expected = new WineRepositoryResponse (1, WineCellarController.SUCCESS, WineCellarController.SUCCESS, (Wine[]) wines.toArray(new Wine[wines.size()]));
+        WineRepositoryResponse actual = controllerImpl.wineImpl(WineType.BOLD_RED.toString(), "rioja", wineRepository, tracer);
+        
+        if (expected.equals(actual)) {
+            System.out.println("Good");
+        } else {
+            System.out.println("Bad");
+        }
+        assertTrue(expected.equals(actual));
     }
 }

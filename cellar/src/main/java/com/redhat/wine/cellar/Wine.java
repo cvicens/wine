@@ -1,8 +1,9 @@
 package com.redhat.wine.cellar;
 
+import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
 
-
+@EqualsAndHashCode()
 public class Wine {
 
     @Id

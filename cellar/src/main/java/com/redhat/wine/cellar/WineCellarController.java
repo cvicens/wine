@@ -78,9 +78,13 @@ public class WineCellarController {
             throw new RuntimeException("Unknown freaking error!");
         }
 
+        return wineImpl(wineType, region, wineRepository, tracer);
+    }
+
+    public WineRepositoryResponse wineImpl(String wineType, String region, WineRepository _wineRepository, io.opentracing.Tracer tracer) {
         try {
             WineType _wineType = WineType.valueOf(wineType.toUpperCase());
-            List<Wine> wines = wineRepository.findByTypeAndRegion(_wineType, region.toUpperCase());
+            List<Wine> wines = _wineRepository.findByTypeAndRegion(_wineType, region.toUpperCase());
 
             if (_wineType.equals(WineType.UNKOWN)) {
                 return new WineRepositoryResponse (wineRepositoryCounter.incrementAndGet(), "ERROR", UNKOWN_WINE_TYPE, new Wine[0]);
