@@ -3,7 +3,7 @@ package com.redhat.wine.cellar;
 import lombok.EqualsAndHashCode;
 import org.springframework.data.annotation.Id;
 
-@EqualsAndHashCode()
+@EqualsAndHashCode(exclude={"id"})
 public class Wine {
 
     @Id

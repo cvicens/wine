@@ -2,7 +2,7 @@ package com.redhat.wine.cellar;
 
 import lombok.EqualsAndHashCode;
 
-@EqualsAndHashCode(exclude={"id", "wines"})
+@EqualsAndHashCode(of={"status", "description"})
 public class WineRepositoryResponse {
     
 	private final long id;

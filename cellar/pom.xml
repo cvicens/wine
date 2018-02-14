@@ -23,6 +23,9 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
 
+		<version.maven.surefire>2.18</version.maven.surefire>
+    <version.maven.failsafe>2.18.1</version.maven.failsafe>
+
 		<skipTests>false</skipTests>
     <skipITs>${skipTests}</skipITs>
     <skipUTs>${skipTests}</skipUTs>
@@ -114,6 +117,38 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>${version.maven.failsafe}</version>
+				<configuration>
+					<encoding>UTF-8</encoding>
+					<skipTests>${skipTests}</skipTests>
+					<skipITs>${skipITs}</skipITs>
+					<systemProperties>
+						<property>
+							<name>test.it.hostName</name>
+							<value>${test.it.hostName}</value>
+						</property>
+					</systemProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+								<goal>integration-test</goal>
+								<goal>verify</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${version.maven.surefire}</version>
+				<configuration>
+						<skipTests>${skipUTs}</skipTests>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 
@@ -180,11 +215,6 @@
 		        <groupId>org.codehaus.mojo</groupId>
 		        <artifactId>findbugs-maven-plugin</artifactId>
 		        <version>3.0.5</version>
-		      </plugin>
-		      <plugin>
-		        <groupId>org.apache.maven.plugins</groupId>
-		        <artifactId>maven-surefire-report-plugin</artifactId>
-		        <version>2.20.1</version>
 		      </plugin>
 		      <plugin>
 		        <groupId>org.apache.maven.plugins</groupId>

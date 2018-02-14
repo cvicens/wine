@@ -17,15 +17,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest
+@SpringBootTest(classes=WineCellarApplication.class)
 @AutoConfigureMockMvc
-public class WineCellarApplicationITTests {
+public class WineCellarApplicationTestsIT {
 
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     public void paramPairingWithRightFoodTypeShouldReturnTailoredMessage() throws Exception {
+        System.out.println(">>>> INTEGRATION WineCellarApplicationTestsIT=>paramPairingWithRightFoodTypeShouldReturnTailoredMessage");
 
         this.mockMvc.perform(
                 get("/wine")
