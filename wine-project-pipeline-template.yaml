@@ -1,0 +1,215 @@
+#  oc process ./wine-project-pipeline-template.yaml \
+#     -p NAME=cellar \
+#     -p ROOT_GIT_URL=http://mitzi-gogs.cloudapps-579a.oslab.opentlc.com/gogs/wine \
+#     -p GIT_CONTEXT_DIR=cellar \
+#     -p CICD_PROJECT_NAME=wine-cicd \
+#     -p DEVELOPMENT_PROJECT_NAME=wine-dev \
+#     -p STAGE_PROJECT_NAME=wine-stage \
+#     -p NEXUS_URL=http://nexus3-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
+#     -p SONARQUBE_URL=http://sonarqube-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
+#     -p SONARQUBE_TOKEN=96c88bba952681ccf8f30fc0545a16cb4a9a5aea \
+#     -p SMOKE_TEST_URL_DEV=http://wine-cellar-wine-dev.cloudapps-579a.oslab.opentlc.com/ \
+#     -p SMOKE_TEST_URL_STAGE=http://wine-cellar-wine-stage.cloudapps-579a.oslab.opentlc.com/ \
+#     -p SMOKE_TEST_URI=wine?wineType=bold_red\&region=rioja
+
+apiVersion: v1
+kind: Template
+metadata:
+  name: wine-pipeline-template
+  annotations:
+    openshift.io/display-name: "Wine pipe-line" 
+    description: "Example pipeline for project https://github.com/cvicens/wine" 
+    tags: "spring-boot,pipe-line,jenkins" 
+    iconClass: "icon-spring" 
+  
+objects:
+- apiVersion: v1
+  kind: BuildConfig
+  metadata:
+    name: ${NAME}-pipeline
+  spec:
+    nodeSelector: null
+    output: {}
+    postCommit: {}
+    resources: {}
+    runPolicy: Serial
+    source:
+      type: None
+    strategy:
+      jenkinsPipelineStrategy:
+        jenkinsfile: |-
+          node('maven') {
+                    def nexus = '${NEXUS_URL}'
+                    def sonar = '${SONARQUBE_URL}'
+                    def sonarToken = '${SONARQUBE_TOKEN}'
+                    
+                    def routeDev = '${SMOKE_TEST_URL_DEV}'
+                    def routeStage = '${SMOKE_TEST_URL_STAGE}'
+                    
+                    def buildName = '${NAME}'
+                    def serviceName = '${NAME}'
+                    def deployConfigName = '${NAME}'
+                    def imageStream = '${NAME}'
+                    
+                    def cicdProject = '${CICD_PROJECT_NAME}'
+                    def devProject = '${DEVELOPMENT_PROJECT_NAME}'
+                    def stageProject = '${STAGE_PROJECT_NAME}'
+                            
+                    //def mvnCmd = "mvn"
+                    def mvnCmd = "mvn -s ./nexus_openshift_settings.xml"
+                    // The following variables need to be defined at the top level and not inside
+                    // the scope of a stage - otherwise they would not be accessible from other stages.
+                    // Extract version and other properties from the pom.xml
+                    //def groupId    = getGroupIdFromPom("pom.xml")
+                    //def artifactId = getArtifactIdFromPom("pom.xml")
+                    //def version    = getVersionFromPom("pom.xml")
+                    
+                    stage('Checkout Source') {
+                      // Get Source Code from SCM (Git) as configured in the Jenkins Project
+                      // Next line for inline script, "checkout scm" for Jenkinsfile from Gogs
+                      git '${ROOT_GIT_URL}'
+                      //checkout scm
+                      cd ${GIT_CONTEXT_DIR}
+                    }
+                    
+                    dir ('${GIT_CONTEXT_DIR}') {
+                      sh "pwd"
+                      stage('Build JAR') {
+                        echo "${nexus} ${sonar}"
+                        echo "Building version"
+                        sh "${mvnCmd} clean package -DskipTests"
+                      }
+                              
+                      stage('Unit Tests') {
+                        echo "Unit Tests"
+                        sh "${mvnCmd} test"
+                      }
+                      
+                      stage('Code Analysis') {
+                        echo "Code Analysis"
+                        sh "${mvnCmd} sonar:sonar -Dsonar.host.url=${sonar} -Dsonar.projectName=${JOB_BASE_NAME} -Dsonar.login=${sonarToken}"
+                      }
+                      
+                      stage('Publish to Nexus') {
+                        echo "Publish to Nexus"
+                        sh "${mvnCmd} deploy -DskipTests=true -DaltDeploymentRepository=nexus::default::${nexus}/repository/maven-releases/"
+                      }
+
+                      stage('Build Image') {
+                        // Copy the jar file we just built and rename to ROOT.jar
+                        sh "cp ./target/wine-pairing*.jar ./ROOT.jar"
+
+                        // Start Binary Build in OpenShift using the file we just published
+                        sh "oc project ${cicdProject}"
+                        sh "oc start-build ${buildName} --follow --from-file=./ROOT.jar -n ${cicdProject}"
+                      }
+
+                      stage('Approve') {
+                        timeout(time:15, unit:'MINUTES') {
+                          input message:'Approve Deploy to Dev?'
+                        }
+                      }
+                      
+                      stage('Deploy Dev') {
+                        def newTag = "dev"
+                        echo "New Tag: ${newTag}"
+
+                        openshiftTag alias: 'false', destStream: imageStream, destTag: newTag, destinationNamespace: devProject, namespace: cicdProject, srcStream: imageStream, srcTag: 'latest', verbose: 'false'
+                        //openshiftVerifyDeployment(deploymentConfig: "winepairing", replicaCount: 1, verifyReplicaCount: true)
+                        sleep 10
+                      }
+                              
+                      stage('Verify Service Dev') {
+                        openshiftVerifyDeployment(deploymentConfig: deployConfigName, namespace: devProject, replicaCount: 1, verifyReplicaCount: true)
+                        sh "curl -kv ${routeDev}/${SMOKE_TEST_URI}"
+                      }
+                      
+                      stage('Approve') {
+                        timeout(time:15, unit:'MINUTES') {
+                          input message:'Approve Deploy to Stage?'
+                        }
+                      }
+                      
+                      stage('Deploy Stage') {
+                        def newTag = "stage"
+                        echo "New Tag: ${newTag}"
+
+                        openshiftTag alias: 'false', destStream: imageStream, destTag: newTag, destinationNamespace: stageProject, namespace: cicdProject, srcStream: imageStream, srcTag: 'latest', verbose: 'false'
+                        //openshiftVerifyDeployment(deploymentConfig: "winepairing", replicaCount: 1, verifyReplicaCount: true)
+                        sleep 10
+                      }
+                              
+                      stage('Verify Service Stage') {
+                        openshiftVerifyDeployment(deploymentConfig: deployConfigName, namespace: stageProject, replicaCount: 1, verifyReplicaCount: true)
+                        sh "curl -kv ${routeStage}/${SMOKE_TEST_URI}"
+                      }
+                    }
+                  }
+      type: JenkinsPipeline
+    triggers: []
+  status:
+    lastVersion: 8
+
+# Parameters
+parameters:
+
+- description: The name assigned to all the objects defined in this template, 'cellar' for instance
+  displayName: Name
+  name: NAME
+  required: true
+
+- description: Root Git URL, leave it by default if you don't know what you're doing ;-)
+  displayName: Root Git URL
+  name: ROOT_GIT_URL
+  required: true
+  value: https://github.com/cvicens/wine
+
+- description: Git context dir for instance 'cellar'
+  displayName: Git Context dir
+  name: GIT_CONTEXT_DIR
+  required: true
+
+- description: CICD project name, for instance wine-cicd
+  displayName: CICD project name
+  name: CICD_PROJECT_NAME
+  required: true
+
+- description: Development project name, for instance wine-dev
+  displayName: Development project name
+  name: DEVELOPMENT_PROJECT_NAME
+  required: true
+
+- description: Stage project name, for instance wine-stage
+  displayName: Stage project name
+  name: STAGE_PROJECT_NAME
+  required: true
+
+- description: NEXUS URL for instance http://nexus3-coolstore-infra.cloudapps-579a.oslab.opentlc.com
+  displayName: NEXUS URL
+  name: NEXUS_URL
+  required: true
+
+- description: SONARQUBE URL for instance http://sonarqube-coolstore-infra.cloudapps-579a.oslab.opentlc.com
+  displayName: SONARQUBE URL
+  name: SONARQUBE_URL
+  required: true
+
+- description: SONARQUBE TOKEN for instance 96c88bba952681ccf8f30fc0545a16cb4a9a5aea
+  displayName: SONARQUBE TOKEN
+  name: SONARQUBE_TOKEN
+  required: true
+
+- description: Smoke test URL DEV for instance http://wine-cellar-wine-dev.cloudapps-579a.oslab.opentlc.com/
+  displayName: Smoke test URL DEV
+  name: SMOKE_TEST_URL_DEV
+  required: true
+
+- description: Smoke test URL STAGE for instance http://wine-cellar-wine-stage.cloudapps-579a.oslab.opentlc.com/
+  displayName: Smoke test URL STAGE
+  name: SMOKE_TEST_URL_STAGE
+  required: true
+
+- description: Smoke test URI for instance wine?wineType=bold_red&region=rioja
+  displayName: Smoke test URL
+  name: SMOKE_TEST_URI
+  required: true

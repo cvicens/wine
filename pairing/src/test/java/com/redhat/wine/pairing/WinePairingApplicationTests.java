@@ -10,7 +10,6 @@ import static org.hamcrest.Matchers.not;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.omg.PortableInterceptor.SUCCESSFUL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
