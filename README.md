@@ -32,7 +32,7 @@ There are two ways to deploy our template in the project we just created: one in
 
 ## Processing the template
 
-$ oc create -f wine-project-template.yaml -n wine-project
+```
 $ oc process -f wine-project-template.yaml | oc create -n wine-project -f -
 secret "mongodb" created
 persistentvolumeclaim "mongodb" created
@@ -43,6 +43,7 @@ buildconfig "wine-service" created
 deploymentconfig "wine-service" created
 service "wine-service" created
 route "wine-service" created
+```
 
 ## Adding our template to the 'openshift' project
 
