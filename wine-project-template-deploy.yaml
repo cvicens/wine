@@ -1,6 +1,6 @@
 # Template meant for dev, stage, not for CICD, for CICD use wine-project-template.yaml
 
-#  oc process ./wine-project-template-deploy.yaml -p IMAGE_TAG=dev | oc create -n wine-dev -f -
+#  oc process -f ./wine-project-template-deploy.yaml -p IMAGE_TAG=dev | oc create -n wine-dev -f -
 
 apiVersion: v1
 kind: Template

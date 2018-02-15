@@ -1,4 +1,4 @@
-#  oc process ./wine-project-pipeline-template.yaml \
+#  oc process -f ./wine-project-pipeline-template.yaml \
 #     -p NAME=cellar \
 #     -p ROOT_GIT_URL=http://mitzi-gogs.cloudapps-579a.oslab.opentlc.com/gogs/wine \
 #     -p GIT_CONTEXT_DIR=cellar \
@@ -10,7 +10,21 @@
 #     -p SONARQUBE_TOKEN=96c88bba952681ccf8f30fc0545a16cb4a9a5aea \
 #     -p SMOKE_TEST_URL_DEV=http://wine-cellar-wine-dev.cloudapps-579a.oslab.opentlc.com/ \
 #     -p SMOKE_TEST_URL_STAGE=http://wine-cellar-wine-stage.cloudapps-579a.oslab.opentlc.com/ \
-#     -p SMOKE_TEST_URI=wine?wineType=bold_red\&region=rioja
+#     -p SMOKE_TEST_URI=wine?wineType=bold_red\&region=rioja | oc create -n wine-cicd -f -
+
+#  oc process -f ./wine-project-pipeline-template.yaml \
+#     -p NAME=pairing \
+#     -p ROOT_GIT_URL=http://mitzi-gogs.cloudapps-579a.oslab.opentlc.com/gogs/wine \
+#     -p GIT_CONTEXT_DIR=pairing \
+#     -p CICD_PROJECT_NAME=wine-cicd \
+#     -p DEVELOPMENT_PROJECT_NAME=wine-dev \
+#     -p STAGE_PROJECT_NAME=wine-stage \
+#     -p NEXUS_URL=http://nexus3-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
+#     -p SONARQUBE_URL=http://sonarqube-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
+#     -p SONARQUBE_TOKEN=96c88bba952681ccf8f30fc0545a16cb4a9a5aea \
+#     -p SMOKE_TEST_URL_DEV=http://wine-cellar-wine-dev.cloudapps-579a.oslab.opentlc.com/ \
+#     -p SMOKE_TEST_URL_STAGE=http://wine-cellar-wine-stage.cloudapps-579a.oslab.opentlc.com/ \
+#     -p SMOKE_TEST_URI=pairing\?foodType=FISH | oc create -n wine-cicd -f -
 
 apiVersion: v1
 kind: Template
@@ -23,152 +37,6 @@ metadata:
     iconClass: "icon-spring" 
   
 objects:
-# Deployment base on image for DEV PROJECT
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    name: wine-${NAME}
-    labels:
-      application: ${NAME}
-    namespace: ${DEVELOPMENT_PROJECT_NAME}
-    annotations:
-      description: Keeps track of changes in the application image
-  spec:
-    dockerImageRepository: ''
-    tags:
-      - name: dev
-
-- apiVersion: v1
-  kind: DeploymentConfig
-  metadata:
-    labels:
-      app: wine-${NAME}
-    name: wine-${NAME}
-    namespace: ${DEVELOPMENT_PROJECT_NAME}
-  spec:
-    replicas: 1
-    selector:
-      app: wine-${NAME}
-      deploymentconfig: wine-${NAME}
-    strategy:
-      activeDeadlineSeconds: 21600
-      resources: {}
-      rollingParams:
-        intervalSeconds: 1
-        maxSurge: 25%
-        maxUnavailable: 25%
-        timeoutSeconds: 600
-        updatePeriodSeconds: 1
-      type: Rolling
-    template:
-      metadata:
-        labels:
-          app: wine-${NAME}
-          deploymentconfig: wine-${NAME}
-      spec:
-        containers:
-          - image: ' '
-            imagePullPolicy: Always
-            name: wine-${NAME}
-            ports:
-              - containerPort: 8080
-                protocol: TCP
-              - containerPort: 8443
-                protocol: TCP
-              - containerPort: 8778
-                protocol: TCP
-            resources: {}
-        dnsPolicy: ClusterFirst
-        restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        terminationGracePeriodSeconds: 30
-    test: false
-    triggers:
-      - type: ConfigChange
-      - type: ImageChange
-        imageChangeParams:
-          automatic: true
-          containerNames:
-            - wine-${}
-          from:
-            kind: ImageStreamTag
-            name: 'wine-${NAME}:dev'
-            namespace: ${DEVELOPMENT_PROJECT_NAME}
-
-# Deployment base on image for STAGE PROJECT
-- kind: ImageStream
-  apiVersion: v1
-  metadata:
-    name: wine-${NAME}
-    labels:
-      application: wine-${NAME}
-    namespace: ${STAGE_PROJECT_NAME}
-    annotations:
-      description: Keeps track of changes in the application image
-  spec:
-    dockerImageRepository: ''
-    tags:
-      - name: stage
-
-- apiVersion: v1
-  kind: DeploymentConfig
-  metadata:
-    labels:
-      app: wine-${NAME}
-    name: wine-${NAME}
-    namespace: ${STAGE_PROJECT_NAME}
-  spec:
-    replicas: 1
-    selector:
-      app: wine-${NAME}
-      deploymentconfig: ${NAME}
-    strategy:
-      activeDeadlineSeconds: 21600
-      resources: {}
-      rollingParams:
-        intervalSeconds: 1
-        maxSurge: 25%
-        maxUnavailable: 25%
-        timeoutSeconds: 600
-        updatePeriodSeconds: 1
-      type: Rolling
-    template:
-      metadata:
-        labels:
-          app: wine-${NAME}
-          deploymentconfig: ${NAME}
-      spec:
-        containers:
-          - image: ' '
-            imagePullPolicy: Always
-            name: ${NAME}
-            ports:
-              - containerPort: 8080
-                protocol: TCP
-              - containerPort: 8443
-                protocol: TCP
-              - containerPort: 8778
-                protocol: TCP
-            resources: {}
-        dnsPolicy: ClusterFirst
-        restartPolicy: Always
-        schedulerName: default-scheduler
-        securityContext: {}
-        terminationGracePeriodSeconds: 30
-    test: false
-    triggers:
-      - type: ConfigChange
-      - imageChangeParams:
-          automatic: true
-          containerNames:
-            - wine-${NAME}
-          from:
-            kind: ImageStreamTag
-            name: 'wine-${NAME}:stage'
-            namespace: ${STAGE_PROJECT_NAME}
-        type: ImageChange
-
 # Pipe-line
 - apiVersion: v1
   kind: BuildConfig
@@ -215,8 +83,6 @@ objects:
                       // Get Source Code from SCM (Git) as configured in the Jenkins Project
                       // Next line for inline script, "checkout scm" for Jenkinsfile from Gogs
                       git '${ROOT_GIT_URL}'
-                      //checkout scm
-                      cd ${GIT_CONTEXT_DIR}
                     }
                     
                     dir ('${GIT_CONTEXT_DIR}') {
