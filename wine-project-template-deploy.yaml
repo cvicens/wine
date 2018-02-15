@@ -1,7 +1,6 @@
 # Template meant for dev, stage, not for CICD, for CICD use wine-project-template.yaml
 
-#  oc process ./wine-project-template-deploy.yaml \
-#     -p IMAGE_TAG=dev | oc create -n wine-dev -f -
+#  oc process ./wine-project-template-deploy.yaml -p IMAGE_TAG=dev | oc create -n wine-dev -f -
 
 apiVersion: v1
 kind: Template
@@ -308,42 +307,7 @@ objects:
   spec:
     dockerImageRepository: ''
     tags:
-      - name: latest
-
-- kind: BuildConfig
-  apiVersion: v1
-  metadata:
-    name: ${NAME}-cellar
-    labels:
-      application: ${NAME}
-  spec:
-    output:
-      to:
-        kind: ImageStreamTag
-        name: ${NAME}-cellar:${IMAGE_TAG}
-    source:
-      contextDir: cellar
-      git:
-        ref: master
-        uri: ${ROOT_GIT_URL}
-      type: Git
-    strategy:
-      sourceStrategy:
-        from:
-          kind: ImageStreamTag
-          name: redhat-openjdk18-openshift:1.1
-          namespace: ${NAMESPACE}
-      type: Source
-    triggers:
-    - github:
-        secret: ${GITHUB_WEBHOOK_SECRET}
-      type: GitHub
-    - generic:
-        secret: ${GENERIC_WEBHOOK_SECRET}
-      type: Generic
-    - imageChange: {}
-      type: ImageChange
-    - type: ConfigChange
+      - name: ${IMAGE_TAG}
 
 - kind: DeploymentConfig
   apiVersion: v1
