@@ -31,8 +31,8 @@ public class WineCellarApplicationTestsIT {
                     .param("region", "rioja"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.status").value(WineCellarController.SUCCESS))
-                .andExpect(jsonPath("$.description").value(WineCellarController.SUCCESS))
+                .andExpect(jsonPath("$.status").value(WineCellarControllerImpl.SUCCESS))
+                .andExpect(jsonPath("$.description").value(WineCellarControllerImpl.SUCCESS))
                 .andExpect(jsonPath("$.wines").isArray());
 
     }

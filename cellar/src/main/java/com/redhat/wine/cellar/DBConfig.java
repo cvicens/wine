@@ -36,8 +36,14 @@ public class DBConfig extends AbstractMongoConfiguration{
 
         System.out.println("uri: " + uri);
 
-        return new MongoClient(new MongoClientURI(uri)
-);
+        MongoClient client = null;
+        try {
+            client = new MongoClient(new MongoClientURI(uri));
+        } catch (Throwable e) {
+            System.err.println("Error connecting to Mongo: " + uri);
+        }
+
+        return client;
     }
 
     @Override

@@ -92,6 +92,25 @@ $ curl -k http://wine-service-wine-project.apps.192.168.60.120.nip.io/wine?wineT
 {"id":3,"status":"SUCCESS","description":"SUCCESS","wines":[]}
 ```
 
+# Sample Jenkins pipe-line
+
+Fit next example to your needs...
+```
+oc process -f ./wine-project-pipeline-template.yaml \
+   -p NAME=cellar \
+   -p ROOT_GIT_URL=http://mitzi-gogs.cloudapps-579a.oslab.opentlc.com/gogs/wine \
+   -p GIT_CONTEXT_DIR=cellar \
+   -p CICD_PROJECT_NAME=wine-cicd \
+   -p DEVELOPMENT_PROJECT_NAME=wine-dev \
+   -p STAGE_PROJECT_NAME=wine-stage \
+   -p NEXUS_URL=http://nexus3-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
+   -p SONARQUBE_URL=http://sonarqube-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
+   -p SONARQUBE_TOKEN=96c88bba952681ccf8f30fc0545a16cb4a9a5aea \
+   -p SMOKE_TEST_URL_DEV=http://wine-cellar-wine-dev.cloudapps-579a.oslab.opentlc.com/ \
+   -p SMOKE_TEST_URL_STAGE=http://wine-cellar-wine-stage.cloudapps-579a.oslab.opentlc.com/ \
+   -p SMOKE_TEST_URI=wine?wineType=bold_red\&region=rioja | oc create -n wine-cicd -f -
+```
+
 
 
 
