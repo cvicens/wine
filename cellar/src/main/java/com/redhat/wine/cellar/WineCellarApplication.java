@@ -22,21 +22,29 @@ public class WineCellarApplication {
 
 	@Bean
 	public io.opentracing.Tracer jaegerTracer() {
-		String agentHost = System.getenv(TRACING_SERVICE_NAME);
-		Integer agentPort = System.getenv(TRACING_SERVICE_PORT) != null ? Integer.decode(System.getenv(TRACING_SERVICE_PORT)) : 6831;
+		Integer agentPort = null;
+		String agentHost = null;
+
+		try {
+			agentHost = System.getenv(TRACING_SERVICE_NAME);
+			agentPort = System.getenv(TRACING_SERVICE_PORT) != null ? Integer.decode(System.getenv(TRACING_SERVICE_PORT)) : 6831;
+		} catch (Throwable e) {
+			System.err.println("ERROR: jaegerTracer configuration" + e.getMessage());
+		}
 		
-		/*return new Configuration(WINE_SERVICE, new Configuration.SamplerConfiguration(ProbabilisticSampler.TYPE, 1),
+		if (agentHost != null && agentPort != null) {
+			return new Configuration(
+				WINE_SERVICE,
+				new Configuration.SamplerConfiguration("const", 1),
+				new Configuration.ReporterConfiguration(
+					true, agentHost, agentPort, 1000, 10000)
+			).getTracer();
+		}
+
+		return new Configuration(WINE_SERVICE, new Configuration.SamplerConfiguration(ProbabilisticSampler.TYPE, 1),
 				new Configuration.ReporterConfiguration())
-				.getTracer();*/
-
-		return new Configuration(
-			WINE_SERVICE,
-			new Configuration.SamplerConfiguration("const", 1),
-			new Configuration.ReporterConfiguration(
-				true, agentHost, agentPort, 1000, 10000)
-		).getTracer();
+				.getTracer();
 	}
-
 
 	//@Bean
 	/*public io.opentracing.Tracer zipkinTracer() {

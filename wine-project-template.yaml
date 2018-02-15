@@ -167,7 +167,7 @@ objects:
       contextDir: pairing
       git:
         ref: master
-        uri: https://github.com/cvicens/wine
+        uri: ${ROOT_GIT_URL}
       type: Git
     strategy:
       sourceStrategy:
@@ -355,7 +355,7 @@ objects:
       contextDir: cellar
       git:
         ref: master
-        uri: https://github.com/cvicens/wine
+        uri: ${ROOT_GIT_URL}
       type: Git
     strategy:
       sourceStrategy:
@@ -523,7 +523,14 @@ parameters:
   required: true
   value: wine
 
-- displayName: Tracing Service Name
+- description: Root Git URL, leave it by default if you don't know what you're doing ;-)
+  displayName: Root Git URL
+  name: ROOT_GIT_URL
+  required: true
+  value: https://github.com/cvicens/wine
+
+- description: This template allows you to hook with jaeger set up here the service name
+  displayName: Tracing Service Name
   name: TRACING_SERVICE_NAME
   required: false
 

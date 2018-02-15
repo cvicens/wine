@@ -33,7 +33,6 @@ public class WinePairingController {
 
     private final AtomicLong counter = new AtomicLong();
     private final AtomicLong pairingCounter = new AtomicLong();
-    private final AtomicLong wineRepositoryCounter = new AtomicLong();
 
     @RequestMapping("/health")
     public String health() {
