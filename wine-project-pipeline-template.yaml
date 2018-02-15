@@ -23,10 +23,158 @@ metadata:
     iconClass: "icon-spring" 
   
 objects:
+# Deployment base on image for DEV PROJECT
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: wine-${NAME}
+    labels:
+      application: ${NAME}
+    namespace: ${DEVELOPMENT_PROJECT_NAME}
+    annotations:
+      description: Keeps track of changes in the application image
+  spec:
+    dockerImageRepository: ''
+    tags:
+      - name: dev
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: wine-${NAME}
+    name: wine-${NAME}
+    namespace: ${DEVELOPMENT_PROJECT_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: wine-${NAME}
+      deploymentconfig: wine-${NAME}
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: wine-${NAME}
+          deploymentconfig: wine-${NAME}
+      spec:
+        containers:
+          - image: ' '
+            imagePullPolicy: Always
+            name: wine-${NAME}
+            ports:
+              - containerPort: 8080
+                protocol: TCP
+              - containerPort: 8443
+                protocol: TCP
+              - containerPort: 8778
+                protocol: TCP
+            resources: {}
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+      - type: ConfigChange
+      - type: ImageChange
+        imageChangeParams:
+          automatic: true
+          containerNames:
+            - wine-${}
+          from:
+            kind: ImageStreamTag
+            name: 'wine-${NAME}:dev'
+            namespace: ${DEVELOPMENT_PROJECT_NAME}
+
+# Deployment base on image for STAGE PROJECT
+- kind: ImageStream
+  apiVersion: v1
+  metadata:
+    name: wine-${NAME}
+    labels:
+      application: wine-${NAME}
+    namespace: ${STAGE_PROJECT_NAME}
+    annotations:
+      description: Keeps track of changes in the application image
+  spec:
+    dockerImageRepository: ''
+    tags:
+      - name: stage
+
+- apiVersion: v1
+  kind: DeploymentConfig
+  metadata:
+    labels:
+      app: wine-${NAME}
+    name: wine-${NAME}
+    namespace: ${STAGE_PROJECT_NAME}
+  spec:
+    replicas: 1
+    selector:
+      app: wine-${NAME}
+      deploymentconfig: ${NAME}
+    strategy:
+      activeDeadlineSeconds: 21600
+      resources: {}
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+      type: Rolling
+    template:
+      metadata:
+        labels:
+          app: wine-${NAME}
+          deploymentconfig: ${NAME}
+      spec:
+        containers:
+          - image: ' '
+            imagePullPolicy: Always
+            name: ${NAME}
+            ports:
+              - containerPort: 8080
+                protocol: TCP
+              - containerPort: 8443
+                protocol: TCP
+              - containerPort: 8778
+                protocol: TCP
+            resources: {}
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+    test: false
+    triggers:
+      - type: ConfigChange
+      - imageChangeParams:
+          automatic: true
+          containerNames:
+            - wine-${NAME}
+          from:
+            kind: ImageStreamTag
+            name: 'wine-${NAME}:stage'
+            namespace: ${STAGE_PROJECT_NAME}
+        type: ImageChange
+
+# Pipe-line
 - apiVersion: v1
   kind: BuildConfig
   metadata:
     name: ${NAME}-pipeline
+    namespace: ${CICD_PROJECT_NAME}
   spec:
     nodeSelector: null
     output: {}
@@ -46,10 +194,9 @@ objects:
                     def routeDev = '${SMOKE_TEST_URL_DEV}'
                     def routeStage = '${SMOKE_TEST_URL_STAGE}'
                     
-                    def buildName = '${NAME}'
-                    def serviceName = '${NAME}'
-                    def deployConfigName = '${NAME}'
-                    def imageStream = '${NAME}'
+                    def buildName = 'wine-${NAME}'
+                    def deployConfigName = 'wine-${NAME}'
+                    def imageStream = 'wine-${NAME}'
                     
                     def cicdProject = '${CICD_PROJECT_NAME}'
                     def devProject = '${DEVELOPMENT_PROJECT_NAME}'
@@ -97,7 +244,7 @@ objects:
 
                       stage('Build Image') {
                         // Copy the jar file we just built and rename to ROOT.jar
-                        sh "cp ./target/wine-pairing*.jar ./ROOT.jar"
+                        sh "cp ./target/${NAME}*.jar ./ROOT.jar"
 
                         // Start Binary Build in OpenShift using the file we just published
                         sh "oc project ${cicdProject}"
