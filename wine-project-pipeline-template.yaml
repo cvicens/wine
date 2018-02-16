@@ -22,8 +22,8 @@
 #     -p NEXUS_URL=http://nexus3-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
 #     -p SONARQUBE_URL=http://sonarqube-coolstore-infra.cloudapps-579a.oslab.opentlc.com \
 #     -p SONARQUBE_TOKEN=96c88bba952681ccf8f30fc0545a16cb4a9a5aea \
-#     -p SMOKE_TEST_URL_DEV=http://wine-cellar-wine-dev.cloudapps-579a.oslab.opentlc.com/ \
-#     -p SMOKE_TEST_URL_STAGE=http://wine-cellar-wine-stage.cloudapps-579a.oslab.opentlc.com/ \
+#     -p SMOKE_TEST_URL_DEV=http://wine-pairing-wine-dev.cloudapps-579a.oslab.opentlc.com/ \
+#     -p SMOKE_TEST_URL_STAGE=http://wine-paring-wine-stage.cloudapps-579a.oslab.opentlc.com/ \
 #     -p SMOKE_TEST_URI=pairing\?foodType=FISH | oc create -n wine-cicd -f -
 
 apiVersion: v1
