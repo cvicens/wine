@@ -20,6 +20,7 @@ public class WinePairingApplication {
 		return restTemplateBuilder.build();
 	}
 
+	@Bean
 	public io.opentracing.Tracer jaegerTracer() {
 		Integer agentPort = null;
 		String agentHost = null;
