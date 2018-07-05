@@ -171,6 +171,9 @@ objects:
       type: Git
     strategy:
       sourceStrategy:
+        env:
+          - name: MAVEN_MIRROR_URL
+            value: ${MAVEN_MIRROR_URL}
         from:
           kind: ImageStreamTag
           name: redhat-openjdk18-openshift:1.1
@@ -359,6 +362,9 @@ objects:
       type: Git
     strategy:
       sourceStrategy:
+        env:
+          - name: MAVEN_MIRROR_URL
+            value: ${MAVEN_MIRROR_URL}
         from:
           kind: ImageStreamTag
           name: redhat-openjdk18-openshift:1.1
@@ -618,3 +624,8 @@ parameters:
   generate: expression
   name: GENERIC_WEBHOOK_SECRET
   required: true
+
+- description: Maven mirror URL
+  displayName: Maven mirror URL
+  name: MAVEN_MIRROR_URL
+  required: false
