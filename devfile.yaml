@@ -1,9 +1,9 @@
 ---
 apiVersion: 1.0.0
 metadata:
-  generateName: inventory-maven-
+  generateName: wine-
 projects:
-  - name: inventory-maven
+  - name: wine
     source:
       location: 'https://github.com/cvicens/wine.git'
       type: git
