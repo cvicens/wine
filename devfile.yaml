@@ -22,7 +22,8 @@ components:
       - name: m2
         containerPath: /home/user/.m2
     alias: tools
-    image: 'quay.io/cvicensa/cnw-che-stack:7.4.0-1'
+    #image: 'quay.io/cvicensa/cnw-che-stack:7.4.0-1'
+    image: 'quay.io/eclipse/che-java8-maven:7.7.1'
     env:
       - value: http://nexus.lab-infra:8081/repository/maven-all-public
         name: MAVEN_MIRROR_URL
