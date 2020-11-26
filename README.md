@@ -94,7 +94,7 @@ $ curl -k http://wine-service-wine-project.apps.192.168.60.120.nip.io/wine?wineT
 
 # Sample Jenkins pipe-line
 
-Fit next example to your needs...
+Fit next example to your needs....
 ```
 oc process -f ./wine-project-pipeline-template.yaml \
    -p NAME=cellar \
